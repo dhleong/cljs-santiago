@@ -1,0 +1,21 @@
+{
+  "name": "santiago",
+  "version": "1.0.0",
+  "description": "",
+  "private": true,
+  "dependencies": {
+    "react": "16.9.0",
+    "react-dom": "16.9.0"
+  },
+  "devDependencies": {},
+  "scripts": {
+    "create-build-report": "shadow-cljs run shadow.cljs.build-report demo build-report.html && open build-report.html",
+    "dev": "shadow-cljs start && shadow-cljs watch :demo",
+    "start": "shadow-cljs start",
+    "stop": "shadow-cljs stop",
+    "watch": "shadow-cljs watch :demo",
+    "test": "shadow-cljs compile ci && karma start --single-run"
+  },
+  "author": "Daniel Leong",
+  "license": "EPL-2.0"
+}

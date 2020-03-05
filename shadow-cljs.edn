@@ -1,0 +1,13 @@
+{:dev-http {8081 "public"}
+
+ :source-paths ["src/main" "src/test" "src/dev"]
+
+ :dependencies [; core:
+                [reagent "0.9.1"]
+                [re-frame "0.11.0"]]
+
+ :builds {:demo {:target :browser
+                 :output-dir "public/js"
+                 :asset-path "/js"
+
+                 :modules {:main {:init-fn santiago.demo/init}}}}}
