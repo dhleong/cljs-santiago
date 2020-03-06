@@ -1,5 +1,6 @@
-(ns santiago.core)
+(ns santiago.core
+  (:require [santiago.input :as input]
+            [santiago.select :as select]))
 
-(defn input []
-  ;; TODO
-  [:input {:type :text :default-value ""}])
+(def input input/input)
+(def select select/select)
