@@ -24,13 +24,26 @@
   "Given the children of an element and a current value, return the
    matching :key. Children are assumed to be, for example:
 
-     [:option {:key :id} value]"
+     [:option {:key :id} value]
+
+   Key may be `nil` for intuitive representation of the absence of value"
   [children target-value]
-  (some->> children
-           flatten-sequences
-           (some (fn [[_ attrs v]]
-                   (when (= target-value v)
-                     (:key attrs))))))
+  (let [k (some->> children
+                   flatten-sequences
+                   (some (fn [[_ attrs v]]
+                           (when (= target-value v)
+                             (if (contains? attrs :key)
+                               (if-some [k (:key attrs)]
+                                 k
+                                 ::nil)
+                               (:key attrs))))))]
+    (case k
+      nil (throw (ex-info (str "Unable to pick new key from value `" target-value "`")
+                          {:children children}))
+      ::nil nil
+
+      ; normal success:
+      k)))
 
 (defn value-from-children
   "Given the children of an element and a :key, return the matching value.

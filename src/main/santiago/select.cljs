@@ -16,10 +16,7 @@
   (let [on-change (fn [e]
                     (let [new-value (.-value (.-target e))
                           new-key (key-from-children children new-value)]
-                      (when-not new-key
-                        (throw (ex-info (str "Unable to pick new key from value `" new-value "`")
-                                        {:children children})))
-
+                      (println "new-key = " new-key)
                       (dispatch-change opts new-key)))
 
         value-key (current-value opts)]

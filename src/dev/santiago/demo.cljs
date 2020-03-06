@@ -1,8 +1,16 @@
 (ns santiago.demo
   (:require [archetype.views.error-boundary :refer [error-boundary]]
+            [clojure.string :as str]
             [reagent.core :as r]
             [santiago.input :refer [input]]
             [santiago.select :refer [select]]))
+
+(def ranks [:officer
+            :detective
+            :sergeant
+            :lieutenant
+            :captain
+            :commissioner])
 
 (defn main []
   (r/with-let [form (r/atom {:name "Amy Santiago"
@@ -17,12 +25,10 @@
 
       [:div
        [select {:model form :key :rank}
-        [:option {:key :officer} "Officer"]
-        [:option {:key :detective} "Detective"]
-        [:option {:key :sergeant} "Sergeant"]
-        [:option {:key :lieutenant} "Lieutenant"]
-        [:option {:key :captain} "Captain"]
-        [:option {:key :commissioner} "Commissioner"]]]]]))
+        [:option {:key nil} "Civilian"]
+
+        (for [r ranks]
+          [:option {:key r} (str/capitalize (name r))])]]]]))
 
 (defn ^:dev/after-load mount-root []
   (r/render [main]
