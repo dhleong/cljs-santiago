@@ -6,10 +6,11 @@
 (defn input [opts]
   (let [on-change (fn [e]
                     (let [new-value (.-value (.-target e))]
-                      (dispatch-change opts new-value)))]
+                      (dispatch-change opts new-value)))
+        value (if-some [v (current-value opts)] v "")]
     [:input (-> opts
                 (assoc :on-change on-change
-                       :value (current-value opts))
+                       :value value)
                 remove-shared-keys)]))
 
 
