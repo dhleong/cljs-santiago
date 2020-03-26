@@ -63,8 +63,11 @@
 (defn current-value
   "Resolve the 'current' value of the element. Supported modes are
    :value for a fixed value, :model for an atom/ratom, or :<sub for
-   a re-frame subscription form."
-  [opts]
+   a re-frame subscription form.
+
+   A :default value may be provided for use as a fallback if the
+   value from the selected mode is `nil`"
+  [context opts]
   (let [default-value (:default opts)]
     (cond
       (contains? opts :value)
@@ -76,6 +79,12 @@
               (get-in current-model (key->path k))
               current-model)
             default-value))
+
+      (contains? opts :key)
+      (if-let [{:keys [model]} context]
+        (get model (:key opts) default-value)
+
+        (throw (ex-info "Element has :key but no [group] context" opts)))
 
       (contains? opts :<sub)
       (or (deref (subscribe (:<sub opts)))
