@@ -17,7 +17,7 @@
   (let [on-change (fn [e]
                     (let [new-value (.-value (.-target e))
                           new-key (key-from-children children new-value)]
-                      (dispatch-change opts new-key)))
+                      (dispatch-change context opts new-key)))
 
         value-key (current-value context opts)]
 

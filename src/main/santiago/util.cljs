@@ -8,6 +8,9 @@
                             (fn [_]
                               (throw (js/Error. "re-frame not found; unable to subscribe")))))
 
+(def ^:private err-group-context-no-key
+  "Element is in a [group] context but has no :key")
+
 (defn flatten-sequences
   "It's common to mix static elements and dynamic elements from sequences
    as children to, eg: [select]. This tool flattens thoses cases into a
@@ -18,7 +21,6 @@
               [sub]
               sub))
           s))
-
 
 (defn key-from-children
   "Given the children of an element and a current value, return the
@@ -58,7 +60,7 @@
 ; ======= value get/set ===================================
 
 (defn- key->path [k]
-  (if (vector? k) k [k]))
+  (if (coll? k) k [k]))
 
 (defn current-value
   "Resolve the 'current' value of the element. Supported modes are
@@ -80,15 +82,21 @@
               current-model)
             default-value))
 
-      (contains? opts :key)
-      (if-let [{:keys [model]} context]
-        (get model (:key opts) default-value)
-
-        (throw (ex-info "Element has :key but no [group] context" opts)))
-
       (contains? opts :<sub)
       (or (deref (subscribe (:<sub opts)))
           default-value)
+
+      ; group context:
+      (contains? opts :key)
+      (if-let [{context-opts :opts} context]
+        (get-in (current-value nil context-opts)
+                (key->path (:key opts))
+                default-value)
+
+        (throw (ex-info "Element has :key but no [group] context" opts)))
+
+      context
+      (throw (ex-info err-group-context-no-key opts))
 
       :else
       (throw (ex-info "No current value provided to element" opts)))))
@@ -102,7 +110,7 @@
 
 (defn dispatch-change
   "Dispatch an :on-change event appropriately"
-  [opts new-value]
+  [context opts new-value]
   (let [{evt-builder :>evt
          model :model
          on-change :on-change} opts]
@@ -110,6 +118,16 @@
       evt-builder (dispatch (evt-builder new-value))
       model (update-model opts model new-value)
       on-change (on-change new-value)
+
+      context (if-let [k (:key opts)]
+                (let [context-opts (:opts context)
+                      old-value (current-value nil context-opts)
+                      new-value (assoc-in old-value
+                                          (key->path k)
+                                          new-value)]
+                  (dispatch-change nil context-opts new-value))
+
+                (throw (ex-info err-group-context-no-key opts)))
 
       :else (throw (ex-info "No event dispatch" opts)))))
 

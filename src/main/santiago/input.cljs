@@ -8,7 +8,7 @@
   [context opts]
   (let [on-change (fn [e]
                     (let [new-value (.-value (.-target e))]
-                      (dispatch-change opts new-value)))
+                      (dispatch-change context opts new-value)))
         value (if-some [v (current-value context opts)] v "")]
     [:input (-> opts
                 (assoc :on-change on-change
