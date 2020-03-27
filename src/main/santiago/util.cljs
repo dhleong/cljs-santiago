@@ -114,10 +114,14 @@
   (let [{evt-builder :>evt
          model :model
          on-change :on-change} opts]
+
+    ; always dispatch on-change if provided
+    (when on-change
+      (on-change new-value))
+
     (cond
       evt-builder (dispatch (evt-builder new-value))
       model (update-model opts model new-value)
-      on-change (on-change new-value)
 
       context (if-let [k (:key opts)]
                 (let [context-opts (:opts context)
@@ -128,6 +132,11 @@
                   (dispatch-change nil context-opts new-value))
 
                 (throw (ex-info err-group-context-no-key opts)))
+
+      ; as mentioned above, we always dispatch :on-change *in addition* to
+      ; any other registered event dispatch. It is okay, however, for there
+      ; to *not be* any other dispatch
+      on-change nil
 
       :else (throw (ex-info "No event dispatch" opts)))))
 
