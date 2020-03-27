@@ -9,6 +9,7 @@
            spade.core/defattrs clojure.core/defn
            spade.core/defclass clojure.core/defn
            spade.core/defglobal clojure.core/def
-           spade.core/defkeyframes clojure.core/defn}}
+           spade.core/defkeyframes clojure.core/defn
+           santiago.impl.context/defcomponent clojure.core/defn}}
 
 
