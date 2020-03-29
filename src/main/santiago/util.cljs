@@ -108,9 +108,6 @@
            new-value)
     (reset! model new-value)))
 
-(defn- dispatch-event [evt-builder data]
-  (dispatch (evt-builder data)))
-
 (declare dispatch-change)
 
 (defn- dispatch-context [context opts new-value]
@@ -136,11 +133,14 @@
          :as handlers} opts]
 
     ; always dispatch all provided handlers
-    (cond->> new-value
-      on-change (on-change)
-      evt-builder (dispatch-event evt-builder)
-      model (update-model opts model)
-      context (dispatch-context context opts))
+    (when on-change
+      (on-change new-value))
+    (when evt-builder
+      (dispatch (evt-builder new-value)))
+    (when model
+      (update-model opts model new-value))
+    (when context
+      (dispatch-context context opts new-value))
 
     ; make sure *something* handled the change
     (when-not (or context (some identity (vals handlers)))
