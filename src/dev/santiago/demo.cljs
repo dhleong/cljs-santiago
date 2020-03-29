@@ -14,6 +14,9 @@
             :captain
             :commissioner])
 
+(def form-default {:name "Amy Santiago"
+                   :rank :sergeant})
+
 (defn- keys-form []
   [:<>
    [:div
@@ -24,11 +27,17 @@
      [:option {:key nil} "Civilian"]
 
      (for [r ranks]
-       [:option {:key r} (str/capitalize (name r))])]]])
+       [:option {:key r} (str/capitalize (name r))])]]
+
+   (let [id (gensym)]
+     [:div
+      [input {:key :coconuting? :id id
+              :type 'checkbox}]
+      [:label {:for id} "Coconuting"]])
+   ])
 
 (defn with-atom []
-  (r/with-let [ratom (r/atom {:name "Amy Santiago"
-                              :rank :sergeant})]
+  (r/with-let [ratom (r/atom form-default)]
     [:<>
      [:h3 "Atom:"]
      [:pre (str @ratom)]
@@ -42,11 +51,17 @@
         [:option {:key nil} "Civilian"]
 
         (for [r ranks]
-          [:option {:key r} (str/capitalize (name r))])]]]]))
+          [:option {:key r} (str/capitalize (name r))])]]
+
+      [:div
+       [input {:model ratom :key :coconuting?
+               :id :coconuting?
+               :type 'checkbox}]
+       [:label {:for :coconuting?} "Coconuting"]]
+      ]]))
 
 (defn with-group []
-  (r/with-let [ratom (r/atom {:name "Amy Santiago"
-                              :rank :sergeant})]
+  (r/with-let [ratom (r/atom form-default)]
     [:<>
      [:h3 "Group:"]
 
@@ -57,8 +72,7 @@
        [keys-form]]]]))
 
 (defn with-form []
-  (r/with-let [ratom (r/atom {:name "Amy Santiago"
-                              :rank :sergeant})
+  (r/with-let [ratom (r/atom form-default)
                submitted (r/atom nil)]
     [:<>
      [:h3 "Form:"]

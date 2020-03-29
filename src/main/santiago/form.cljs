@@ -1,7 +1,7 @@
 (ns santiago.form
   (:require [reagent.core :as r]
             [santiago.group :refer [group]]
-            [santiago.util :refer [current-value]]))
+            [santiago.util :refer [current-value remove-shared-keys]]))
 
 (defn form
   "Form replaces the standard :form element, augmenting :on-submit (if
@@ -11,26 +11,32 @@
 
    NOTE: that default values of child elements are not read, currently."
   [opts & children]
-  (r/with-let [last-value (atom nil)
-               on-change (fn [new-value]
-                           (reset! last-value new-value))]
+  (r/with-let [last-value (atom nil)]
 
-    ; NOTE: update the :on-submit event *every time* in case a client
-    ; has changed it
-    (let [opts (update opts :on-submit
-                       (fn [on-submit]
-                         (when on-submit
-                           ; if an :on-submit was provided that accepts
-                           ; a second argument, pass the current form value
-                           (if (> (.-length ^js on-submit) 1)
-                             #(on-submit % (or @last-value
+    ; NOTE: update the events *every time* in case a client changed them
+    (let [opts (-> opts
+                   (update :on-submit
+                           (fn [on-submit]
+                             (when on-submit
+                               ; if an :on-submit was provided that
+                               ; accepts a second argument, pass the
+                               ; current form value
+                               (if (> (.-length ^js on-submit) 1)
+                                 #(on-submit % (or @last-value
+                                                   ; no changes; send
+                                                   ; "current" value
+                                                   (current-value nil opts)))
+                                 on-submit))))
 
-                                               ; no changes; send "current" value
-                                               (current-value nil opts)))
-                             on-submit))))]
-      [:form opts
+                   (update :on-change
+                           (fn [on-change]
+                             (fn [new-value]
+                               (when on-change
+                                 (on-change new-value))
+                               (reset! last-value new-value)))))]
+      [:form (-> opts
+                 (dissoc :on-change)
+                 (remove-shared-keys))
        (into
-         [group (-> opts
-                    (assoc :on-change on-change)
-                    (dissoc :on-submit))]
+         [group (dissoc opts :on-submit)]
          children)])))
