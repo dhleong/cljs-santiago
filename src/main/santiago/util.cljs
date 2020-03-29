@@ -108,37 +108,43 @@
            new-value)
     (reset! model new-value)))
 
+(defn- dispatch-event [evt-builder data]
+  (dispatch (evt-builder data)))
+
+(declare dispatch-change)
+
+(defn- dispatch-context [context opts new-value]
+  (if-let [k (:key opts)]
+    (let [context-opts (:opts context)
+          old-value (current-value nil context-opts)
+          new-value (assoc-in old-value
+                              (key->path k)
+                              new-value)]
+      (dispatch-change nil context-opts new-value))
+
+    (throw (ex-info err-group-context-no-key opts))))
+
 (defn dispatch-change
-  "Dispatch an :on-change event appropriately"
+  "Dispatch an :on-change event to all registered handlers.
+   This includes a re-frame event builder via :>evt, a ratom
+   via :model, an explicit handler via :on-change, or any of
+   the above in a containing [group] or [form] context."
   [context opts new-value]
   (let [{evt-builder :>evt
          model :model
-         on-change :on-change} opts]
+         on-change :on-change
+         :as handlers} opts]
 
-    ; always dispatch on-change if provided
-    (when on-change
-      (on-change new-value))
+    ; always dispatch all provided handlers
+    (cond->> new-value
+      on-change (on-change)
+      evt-builder (dispatch-event evt-builder)
+      model (update-model opts model)
+      context (dispatch-context context opts))
 
-    (cond
-      evt-builder (dispatch (evt-builder new-value))
-      model (update-model opts model new-value)
-
-      context (if-let [k (:key opts)]
-                (let [context-opts (:opts context)
-                      old-value (current-value nil context-opts)
-                      new-value (assoc-in old-value
-                                          (key->path k)
-                                          new-value)]
-                  (dispatch-change nil context-opts new-value))
-
-                (throw (ex-info err-group-context-no-key opts)))
-
-      ; as mentioned above, we always dispatch :on-change *in addition* to
-      ; any other registered event dispatch. It is okay, however, for there
-      ; to *not be* any other dispatch
-      on-change nil
-
-      :else (throw (ex-info "No event dispatch" opts)))))
+    ; make sure *something* handled the change
+    (when-not (or context (some identity (vals handlers)))
+      (throw (ex-info "No event dispatch" opts)))))
 
 
 ; ======= cleanup =========================================
