@@ -1,5 +1,6 @@
 (ns santiago.input
-  (:require [santiago.impl.context :refer-macros [defcomponent]]
+  (:require [clojure.string :as str]
+            [santiago.impl.context :refer-macros [defcomponent]]
             [santiago.util :refer [current-value
                                    dispatch-change
                                    remove-shared-keys]]))
@@ -15,12 +16,27 @@
        :else (do (println "Unexpected input type" t)
                  t)))))
 
+(defn- input->string-value [e]
+  (.-value (.-target e)))
+
+(defn- ->number [v]
+  (cond
+    (number? v) v
+    (string? v) (if (str/includes? v ".")
+                  (js/parseFloat v)
+                  (js/parseInt v))))
+
 (def ^:private input-configs
   {'checkbox {:value-key :checked
               :get-value (fn [e] (.-checked (.-target e)))
               :default false}
+
+   'number {:value-key :value
+            :get-value (comp ->number input->string-value)
+            :default 0}
+
    :default {:value-key :value
-             :get-value (fn [e] (.-value (.-target e)))
+             :get-value input->string-value
              :default ""}})
 
 (defn- input-config [input-type]

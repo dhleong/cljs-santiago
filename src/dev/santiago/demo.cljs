@@ -34,6 +34,13 @@
       [input {:key :coconuting? :id id
               :type 'checkbox}]
       [:label {:for id} "Coconuting"]])
+   (let [id (gensym)]
+     [:div
+      [input {:key :coconuts
+              :id id
+              :min 0
+              :type 'number}]
+      [:label {:for id} "Coconuts"]])
    ])
 
 (defn with-atom []
@@ -58,6 +65,13 @@
                :id :coconuting?
                :type 'checkbox}]
        [:label {:for :coconuting?} "Coconuting"]]
+
+      [:div
+       [input {:model ratom :key :coconuts
+               :id :coconuts
+               :min 0
+               :type 'number}]
+       [:label {:for :coconuts} "Coconuts"]]
       ]]))
 
 (defn with-group []
