@@ -1,15 +1,5 @@
-{:linters {:unresolved-symbol {:exclude [goog.DEBUG
-                                         (spade.core/defattrs [at-media])
-                                         (spade.core/defclass [at-media])
-                                         (spade.core/defglobal [at-media])
-                                         (spade.core/defkeyframes [at-media])
-]}}
- :lint-as {reagent.core/with-let clojure.core/let
-           secretary.core/defroute clojure.core/fn
-           spade.core/defattrs clojure.core/defn
-           spade.core/defclass clojure.core/defn
-           spade.core/defglobal clojure.core/def
-           spade.core/defkeyframes clojure.core/defn
-           santiago.impl.context/defcomponent clojure.core/defn}}
+{:linters {:unresolved-symbol {:exclude [goog.DEBUG]}}
+ :lint-as {reagent.core/with-let clojure.core/let}
+ :config-paths ["../resources/clj-kondo.exports/net.dhleong/santiago"]}
 
 

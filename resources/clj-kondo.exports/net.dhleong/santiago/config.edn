@@ -1,0 +1,1 @@
+{:lint-as {santiago.impl.context/defcomponent clojure.core/defn}}
